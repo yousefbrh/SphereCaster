@@ -7,23 +7,41 @@ public class SphereCaster : MonoBehaviour
     public float maxDistance;
     public LayerMask layerMask;
     
-    // Sphere Cast Export
+    [Header("Sphere Cast Non Aloc Limit")] 
+    public int sphereCastLimit;
+
+    [Header("Warning!!!")] 
+    [Header("Just choose one of these")]
+    public bool isUsingSphereCast;
+    public bool isUsingSphereCastAll;
+    public bool isUsingSphereCastNonAloc;
+
+    [Header("Sphere Cast Export")]
     public GameObject currentHitObject;
 
-    // Sphere Cast All Export
+    [Header("Sphere Cast All and Sphere Cast Non Aloc Export")]
     public List<GameObject> currentHitObjects = new List<GameObject>();
-
+    
     private Vector3 _origin;
     private Vector3 _direction;
-
     private float _currentHitDistance;
 
     private void Update()
     {
+        Initialize();
+        
+        if (isUsingSphereCast)
+            SphereCast();
+        if (isUsingSphereCastAll)
+            SphereCastAll();
+        if (isUsingSphereCastNonAloc)
+            SphereCastNonAloc();
+    }
+
+    private void Initialize()
+    {
         _origin = transform.position;
         _direction = transform.forward;
-        
-        SphereCastAll();
     }
 
     private void SphereCast()
@@ -52,6 +70,21 @@ public class SphereCaster : MonoBehaviour
         {
             currentHitObjects.Add(hit.transform.gameObject);
             _currentHitDistance = hit.distance;
+        }
+    }
+
+    private void SphereCastNonAloc()
+    {
+        _currentHitDistance = maxDistance;
+        currentHitObjects.Clear();
+        
+        RaycastHit[] raycastHits = new RaycastHit[sphereCastLimit];
+        var numberOfObjects = Physics.SphereCastNonAlloc(_origin, sphereRadius, _direction, raycastHits, maxDistance,
+            layerMask, QueryTriggerInteraction.UseGlobal);
+        for (var i = 0; i < numberOfObjects; i++)
+        {
+            currentHitObjects.Add(raycastHits[i].transform.gameObject);
+            _currentHitDistance = raycastHits[i].distance;
         }
     }
 
